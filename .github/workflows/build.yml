@@ -1,0 +1,53 @@
+
+name: SonarQube Cloud Analysis
+
+on:
+  push:
+    branches:
+      - master
+
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  build-and-analyze:
+    name: Build, Test and SonarQube Analysis
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          submodules: recursive
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Build Angular project
+        run: bun run build
+
+      - name: Run unit tests
+        run: bun run test --run
+
+      - name: SonarQube Cloud Analysis
+        uses: SonarSource/sonarqube-scan-action@v5
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        with:
+          args: >
+            -Dsonar.projectKey=mendezdeleonluisacarolina952-star_angular-realworld-example-app
+            -Dsonar.organization=mendezdeleonluisacarolina952-star
+            -Dsonar.sources=src
