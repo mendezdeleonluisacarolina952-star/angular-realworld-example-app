@@ -23,31 +23,22 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          submodules: recursive
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 22
-
-      - name: Setup Bun
-        uses: oven-sh/setup-bun@v2
+          node-version: 14
 
       - name: Install dependencies
-        run: bun install --frozen-lockfile
+        run: npm ci
 
       - name: Build Angular project
-        run: bun run build
+        run: npm run build
 
       - name: Run unit tests
-        run: bun run test --run
+        run: npm test -- --watch=false --browsers=ChromeHeadless
 
       - name: SonarQube Cloud Analysis
-        uses: SonarSource/sonarqube-scan-action@v5
+        uses: SonarSource/sonarqube-scan-action@v8.4.0
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        with:
-          args: >
-            -Dsonar.projectKey=mendezdeleonluisacarolina952-star_angular-realworld-example-app
-            -Dsonar.organization=mendezdeleonluisacarolina952-star
-            -Dsonar.sources=src
